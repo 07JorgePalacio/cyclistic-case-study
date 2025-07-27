@@ -23,7 +23,7 @@ Analyze historical trip data from Cyclistic, a bike-share program in Chicago, to
 - `proceso_cyclistic.html`: vizualizations.
 
 ## 📎 Link to Portfolio
-👉 [Coursera Projects Page](TU_ENLACE)
+👉 [Coursera Projects Page]((https://www.coursera.org/account-profile)
 
 ---
 
