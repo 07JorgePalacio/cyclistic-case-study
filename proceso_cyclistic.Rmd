@@ -1,0 +1,99 @@
+---
+title: "Caso de Éxito: Análisis del uso de bicicletas en Cyclistic"
+author: "Jorge Palacio"
+date: "2025-07-27"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    theme: united
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(lubridate)
+library(janitor)
+```
+
+# Introducción
+
+Este estudio de caso analiza datos reales del sistema de bicicletas compartidas **Cyclistic** en Chicago. El objetivo principal es comprender las diferencias de uso entre **usuarios casuales** y **miembros anuales**, con el fin de proponer estrategias para convertir usuarios ocasionales en suscriptores.
+
+# 1. Preguntar
+
+**Pregunta de negocio:**
+
+> ¿Cómo se diferencian los patrones de uso entre los ciclistas casuales y los miembros anuales, y qué estrategias podrían implementarse para aumentar las suscripciones?
+
+# 2. Preparar los datos
+
+```{r cargar_datos}
+ruta_archivos <- "C:/Users/Jorge Palacio/OneDrive/Documentos/cyclistic_data"
+archivos <- list.files(path = ruta_archivos, pattern = "*.csv", full.names = TRUE)
+datos_raw <- archivos %>% map_df(~read_csv(.x)) %>% clean_names()
+```
+
+```{r estructura}
+glimpse(datos_raw)
+```
+
+# 3. Procesar los datos
+
+```{r limpieza}
+datos <- datos_raw %>%
+  mutate(started_at = ymd_hms(started_at),
+         ended_at = ymd_hms(ended_at),
+         ride_length = as.numeric(difftime(ended_at, started_at, units = "mins")),
+         day_of_week = wday(started_at, label = TRUE, abbr = FALSE)) %>%
+  filter(ride_length > 0, !is.na(member_casual))
+```
+
+```{r resumen_limpieza}
+summary(datos$ride_length)
+table(datos$member_casual)
+table(datos$day_of_week)
+```
+
+# 4. Analizar los datos
+
+## Promedio de duración por tipo de usuario
+```{r promedio_duracion}
+datos %>%
+  group_by(member_casual) %>%
+  summarise(promedio_duracion = mean(ride_length))
+```
+
+## Número de viajes por día de la semana
+```{r viajes_por_dia}
+datos %>%
+  group_by(member_casual, day_of_week) %>%
+  summarise(n_viajes = n()) %>%
+  ggplot(aes(x = day_of_week, y = n_viajes, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(title = "Número de viajes por día de la semana", x = "Día", y = "Cantidad de viajes") +
+  scale_fill_manual(values = c("#0072B2", "#D55E00"))
+```
+
+# 5. Compartir hallazgos
+
+- Los **usuarios casuales** hacen más viajes los **fines de semana**, con una duración mayor.
+- Los **miembros anuales** tienen un patrón más constante durante la **semana laboral**.
+
+Estas diferencias son claves para diseñar campañas específicas.
+
+# 6. Actuar: Recomendaciones
+
+1. Ofrecer descuentos de fin de semana para usuarios casuales frecuentes.
+2. Promocionar la membresía como solución para transporte diario con beneficios exclusivos.
+3. Personalizar correos y anuncios a usuarios casuales con información comparativa (ahorro vs pago por viaje).
+
+# Conclusión
+
+Este proyecto permite aplicar el proceso completo de análisis de datos: desde la formulación de preguntas hasta la entrega de recomendaciones. Los datos respaldan decisiones estratégicas enfocadas en conversión de usuarios y fortalecimiento del negocio.
+
+---
+
+**Versión corta para portafolio:**
+> Análisis del uso de bicicletas en Chicago, comparando usuarios casuales vs miembros. Se identificaron patrones clave de comportamiento y se formularon recomendaciones de marketing basadas en datos usando R.
