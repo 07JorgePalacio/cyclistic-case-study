@@ -21,9 +21,10 @@ Analyze historical trip data from Cyclistic, a bike-share program in Chicago, to
 ## 📁 Files
 - `proceso_cyclistic.Rmd`: full analysis with code and narrative.
 - `proceso_cyclistic.html`: vizualizations.
+- `data_journal_proceso_ciclístico.pdf`: Procces.
 
 ## 📎 Link to Portfolio
-👉 [Coursera Projects Page]((https://www.coursera.org/account-profile)
+👉 [Coursera Projects Page](https://www.coursera.org/account-profile)
 
 ---
 
