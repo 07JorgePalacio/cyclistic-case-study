@@ -4,7 +4,7 @@
 This is my final capstone project for the [Google Data Analytics Certificate](https://www.coursera.org/professional-certificates/google-data-analytics).
 
 ## 🚀 Interactive Report
-👉 **[Click here to view the Full Analysis & Visualizations](https://07jorgepalacio.github.io/cyclistic-case-study/proyecto_cyclistic.html)**
+👉 **[Click here to view the Full Analysis & Visualizations](https://07jorgepalacio.github.io/cyclistic-case-study/proceso_cyclistic.html)**
 
 ## 🧩 Project Objective
 Analyze **12 months of historical trip data** from Cyclistic, a bike-share program in Chicago, to understand how casual riders and annual members use the service differently, and provide data-driven marketing recommendations.
