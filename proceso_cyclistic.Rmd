@@ -1,60 +1,205 @@
-# Cyclistic Case Study – Google Data Analytics Capstone
-**[ 🇪🇸 Versión en Español abajo ]**
-
-This is my final capstone project for the [Google Data Analytics Certificate](https://www.coursera.org/professional-certificates/google-data-analytics).
-
-## 🚀 Interactive Report
-👉 **[Click here to view the Full Analysis & Visualizations](https://07jorgepalacio.github.io/cyclistic-case-study/proyecto_cyclistic.html)**
-
-## 🧩 Project Objective
-Analyze **12 months of historical trip data** from Cyclistic, a bike-share program in Chicago, to understand how casual riders and annual members use the service differently, and provide data-driven marketing recommendations.
-
-## 📊 Tools Used
-- **R** (Data Cleaning, Analysis, Visualization)
-- **Tidyverse** (dplyr, ggplot2, readr)
-- **Lubridate** (Date manipulation)
-- **RMarkdown** (Documentation and Reporting)
-
-## 🔍 Key Findings
-Based on the analysis of **5.6 million trips** (Dec 2022 - Nov 2023):
-- **Casual users** ride significantly more on weekends and take trips that are **2x longer** than members.
-- **Annual members** use the service consistently during weekdays, suggesting commuting behavior.
-- **Seasonal peaks** occur in summer for both groups, but casual usage drops sharply in winter.
-
-## 📁 Files
-- `proyecto_cyclistic.Rmd`: RMarkdown source code.
-- `proyecto_cyclistic.html`: Rendered HTML report.
-- `data_journal_proceso_ciclístico.pdf`: Data cleaning process documentation.
-
+---
+title: "Caso de Estudio: Análisis Cyclistic"
+author: "Jorge Palacio"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    highlight: tango
+    toc: true
+    toc_float: true
+    number_sections: true
+    df_print: paged
 ---
 
-# Caso de Estudio Cyclistic – Proyecto Final Google Data Analytics
-**[ 🇺🇸 English Version above ]**
+```{r setup, include=FALSE}
+# Configuración global
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
-Este es mi proyecto final para el [Certificado Profesional de Google en Análisis de Datos](https://www.coursera.org/professional-certificates/google-data-analytics).
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(readr)
+```
 
-## 🚀 Informe Interactivo
-👉 **[Haz clic aquí para ver el Análisis Completo y Gráficos](https://07jorgepalacio.github.io/cyclistic-case-study/proyecto_cyclistic.html)**
+# Carga de Datos
 
-## 🧩 Objetivo del Proyecto
-Analizar **12 meses de datos históricos** de Cyclistic, una empresa de bicicletas compartidas en Chicago, para entender las diferencias en el uso del servicio entre ciclistas casuales y miembros anuales, y generar recomendaciones de marketing basadas en datos.
+```{r carga-datos}
+# Lectura de archivos
+archivos <- c(
+  "202212-divvy-tripdata.csv",
+  "202301-divvy-tripdata.csv",
+  "202302-divvy-tripdata.csv",
+  "202303-divvy-tripdata.csv",
+  "202304-divvy-tripdata.csv",
+  "202305-divvy-tripdata.csv",
+  "202306-divvy-tripdata.csv",
+  "202307-divvy-tripdata.csv",
+  "202308-divvy-tripdata.csv",
+  "202309-divvy-tripdata.csv",
+  "202310-divvy-tripdata.csv",
+  "202311-divvy-tripdata.csv"
+)
 
-## 📊 Herramientas Utilizadas
-- **R** (Limpieza, Análisis y Visualización)
-- **Tidyverse** (dplyr, ggplot2, readr)
-- **Lubridate** (Manejo de fechas)
-- **RMarkdown** (Documentación y Reporte)
+# Leer y combinar todos los archivos
+df_viajes <- map_dfr(archivos, ~{
+  if(file.exists(.x)) {
+    read_csv(.x, show_col_types = FALSE)
+  } else {
+    warning(paste("Archivo no encontrado:", .x))
+    NULL
+  }
+})
 
-## 🔍 Hallazgos Clave
-Basado en el análisis de **5.6 millones de viajes** (Dic 2022 - Nov 2023):
-- **Usuarios casuales:** Usan el servicio principalmente los fines de semana y sus viajes duran el **doble** que los de los miembros.
-- **Miembros anuales:** Mantienen un uso constante de lunes a viernes, sugiriendo un uso utilitario (transporte al trabajo).
-- **Estacionalidad:** Ambos grupos tienen su pico en verano, pero el uso casual cae drásticamente en invierno.
+cat("Total de registros cargados:", nrow(df_viajes), "\n")
+```
 
-## 📁 Archivos
-- `proyecto_cyclistic.Rmd`: Código fuente en RMarkdown.
-- `proyecto_cyclistic.html`: Informe HTML generado.
-- `data_journal_proceso_ciclístico.pdf`: Documentación del proceso.
+# Limpieza y Preparación
 
----
-**Author / Autor:** Jorge Palacio
+```{r limpieza}
+# Limpiar nombres de columnas
+df_v2 <- df_viajes %>% clean_names()
+
+# Verificar las primeras filas ANTES de procesar
+cat("Primeras fechas del dataset:\n")
+print(head(df_v2$started_at))
+
+# Conversión segura de fechas
+df_v2 <- df_v2 %>%
+  mutate(
+    started_at = parse_date_time(started_at, orders = c("ymd HMS", "mdy HM")),
+    ended_at = parse_date_time(ended_at, orders = c("ymd HMS", "mdy HM"))
+  )
+
+# Verificar que las fechas se convirtieron correctamente
+cat("\nRegistros con fechas válidas:", sum(!is.na(df_v2$started_at)), "\n")
+cat("Registros con fechas inválidas:", sum(is.na(df_v2$started_at)), "\n")
+
+# Calcular duración del viaje en segundos
+df_v2 <- df_v2 %>%
+  mutate(
+    ride_length = as.numeric(difftime(ended_at, started_at, units = "secs")),
+    date = as.Date(started_at),
+    day_of_week = format(as.Date(date), "%A"),
+    month = format(as.Date(date), "%m")
+  )
+
+cat("\nAntes de filtrar viajes inválidos:", nrow(df_v2), "registros\n")
+
+# Filtrar viajes válidos (duración > 0 y < 24 horas)
+df_v2 <- df_v2 %>% 
+  filter(
+    !is.na(ride_length),
+    ride_length > 0,
+    ride_length < 86400  # menos de 24 horas
+  )
+
+cat("Después de filtrar viajes inválidos:", nrow(df_v2), "registros\n")
+
+# Ordenar días de la semana
+# LO QUE DEBES PEGAR:
+# Ordenar días de la semana (Adaptado a español e inglés por si acaso)
+df_v2$day_of_week <- factor(df_v2$day_of_week, 
+                            levels = c("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo",
+                                       "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+                                       "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"))
+
+# Verificar que tenemos datos
+if(nrow(df_v2) == 0) {
+  stop("ERROR: No hay datos después de la limpieza. Verifica los archivos CSV.")
+}
+
+cat("\n✓ Datos listos para análisis\n")
+head(df_v2 %>% select(started_at, ended_at, ride_length, member_casual, day_of_week))
+```
+
+# Análisis Descriptivo
+
+```{r analisis-descriptivo}
+# Verificar que hay datos antes de agregar
+if(nrow(df_v2) > 0) {
+  
+  cat("## Estadísticas por tipo de usuario\n")
+  resumen_usuario <- df_v2 %>%
+    group_by(member_casual) %>%
+    summarise(
+      total_viajes = n(),
+      duracion_promedio_seg = mean(ride_length, na.rm = TRUE),
+      duracion_promedio_min = duracion_promedio_seg / 60,
+      .groups = 'drop'
+    )
+  print(resumen_usuario)
+  
+  cat("\n## Duración promedio por día de la semana\n")
+  resumen_dia <- df_v2 %>%
+    group_by(member_casual, day_of_week) %>%
+    summarise(
+      duracion_promedio_min = mean(ride_length / 60, na.rm = TRUE),
+      .groups = 'drop'
+    )
+  print(resumen_dia)
+  
+} else {
+  cat("⚠️ No hay datos para analizar\n")
+}
+```
+
+# Visualizaciones
+
+## Número de Viajes por Día
+
+```{r viz-viajes}
+df_v2 %>% 
+  group_by(member_casual, day_of_week) %>% 
+  summarise(number_of_rides = n(), .groups = 'drop') %>% 
+  ggplot(aes(x = day_of_week, y = number_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(values = c("casual" = "#E69F00", "member" = "#56B4E9")) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Total de Viajes por Día de la Semana",
+    subtitle = "Comparación entre usuarios casuales y miembros",
+    x = "Día de la Semana", 
+    y = "Número de Viajes", 
+    fill = "Tipo de Usuario"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Duración Promedio del Viaje
+
+```{r viz-duracion}
+df_v2 %>% 
+  group_by(member_casual, day_of_week) %>% 
+  summarise(average_duration = mean(ride_length) / 60, .groups = 'drop') %>% 
+  ggplot(aes(x = day_of_week, y = average_duration, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(values = c("casual" = "#E69F00", "member" = "#56B4E9")) +
+  labs(
+    title = "Duración Promedio del Viaje",
+    subtitle = "Los usuarios casuales tienden a hacer viajes más largos",
+    x = "Día de la Semana", 
+    y = "Duración Promedio (minutos)", 
+    fill = "Tipo de Usuario"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Conclusiones
+
+```{r conclusiones}
+cat("## Hallazgos principales:\n\n")
+
+if(nrow(df_v2) > 0) {
+  total_casual <- sum(df_v2$member_casual == "casual")
+  total_member <- sum(df_v2$member_casual == "member")
+  pct_casual <- round(100 * total_casual / nrow(df_v2), 1)
+  
+  cat("- Total de viajes analizados:", scales::comma(nrow(df_v2)), "\n")
+  cat("- Usuarios casuales:", scales::comma(total_casual), "(", pct_casual, "%)\n")
+  cat("- Miembros:", scales::comma(total_member), "(", 100 - pct_casual, "%)\n")
+}
+```
+
