@@ -1,99 +1,60 @@
----
-title: "Caso de Éxito: Análisis del uso de bicicletas en Cyclistic"
-author: "Jorge Palacio"
-date: "2025-07-27"
-output:
-  html_document:
-    toc: true
-    toc_depth: 2
-    theme: united
-    df_print: paged
----
+# Cyclistic Case Study – Google Data Analytics Capstone
+**[ 🇪🇸 Versión en Español abajo ]**
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-library(tidyverse)
-library(lubridate)
-library(janitor)
-```
+This is my final capstone project for the [Google Data Analytics Certificate](https://www.coursera.org/professional-certificates/google-data-analytics).
 
-# Introducción
+## 🚀 Interactive Report
+👉 **[Click here to view the Full Analysis & Visualizations](https://07jorgepalacio.github.io/cyclistic-case-study/proyecto_cyclistic.html)**
 
-Este estudio de caso analiza datos reales del sistema de bicicletas compartidas **Cyclistic** en Chicago. El objetivo principal es comprender las diferencias de uso entre **usuarios casuales** y **miembros anuales**, con el fin de proponer estrategias para convertir usuarios ocasionales en suscriptores.
+## 🧩 Project Objective
+Analyze **12 months of historical trip data** from Cyclistic, a bike-share program in Chicago, to understand how casual riders and annual members use the service differently, and provide data-driven marketing recommendations.
 
-# 1. Preguntar
+## 📊 Tools Used
+- **R** (Data Cleaning, Analysis, Visualization)
+- **Tidyverse** (dplyr, ggplot2, readr)
+- **Lubridate** (Date manipulation)
+- **RMarkdown** (Documentation and Reporting)
 
-**Pregunta de negocio:**
+## 🔍 Key Findings
+Based on the analysis of **5.6 million trips** (Dec 2022 - Nov 2023):
+- **Casual users** ride significantly more on weekends and take trips that are **2x longer** than members.
+- **Annual members** use the service consistently during weekdays, suggesting commuting behavior.
+- **Seasonal peaks** occur in summer for both groups, but casual usage drops sharply in winter.
 
-> ¿Cómo se diferencian los patrones de uso entre los ciclistas casuales y los miembros anuales, y qué estrategias podrían implementarse para aumentar las suscripciones?
-
-# 2. Preparar los datos
-
-```{r cargar_datos}
-ruta_archivos <- "C:/Users/Jorge Palacio/OneDrive/Documentos/cyclistic_data"
-archivos <- list.files(path = ruta_archivos, pattern = "*.csv", full.names = TRUE)
-datos_raw <- archivos %>% map_df(~read_csv(.x)) %>% clean_names()
-```
-
-```{r estructura}
-glimpse(datos_raw)
-```
-
-# 3. Procesar los datos
-
-```{r limpieza}
-datos <- datos_raw %>%
-  mutate(started_at = ymd_hms(started_at),
-         ended_at = ymd_hms(ended_at),
-         ride_length = as.numeric(difftime(ended_at, started_at, units = "mins")),
-         day_of_week = wday(started_at, label = TRUE, abbr = FALSE)) %>%
-  filter(ride_length > 0, !is.na(member_casual))
-```
-
-```{r resumen_limpieza}
-summary(datos$ride_length)
-table(datos$member_casual)
-table(datos$day_of_week)
-```
-
-# 4. Analizar los datos
-
-## Promedio de duración por tipo de usuario
-```{r promedio_duracion}
-datos %>%
-  group_by(member_casual) %>%
-  summarise(promedio_duracion = mean(ride_length))
-```
-
-## Número de viajes por día de la semana
-```{r viajes_por_dia}
-datos %>%
-  group_by(member_casual, day_of_week) %>%
-  summarise(n_viajes = n()) %>%
-  ggplot(aes(x = day_of_week, y = n_viajes, fill = member_casual)) +
-  geom_col(position = "dodge") +
-  labs(title = "Número de viajes por día de la semana", x = "Día", y = "Cantidad de viajes") +
-  scale_fill_manual(values = c("#0072B2", "#D55E00"))
-```
-
-# 5. Compartir hallazgos
-
-- Los **usuarios casuales** hacen más viajes los **fines de semana**, con una duración mayor.
-- Los **miembros anuales** tienen un patrón más constante durante la **semana laboral**.
-
-Estas diferencias son claves para diseñar campañas específicas.
-
-# 6. Actuar: Recomendaciones
-
-1. Ofrecer descuentos de fin de semana para usuarios casuales frecuentes.
-2. Promocionar la membresía como solución para transporte diario con beneficios exclusivos.
-3. Personalizar correos y anuncios a usuarios casuales con información comparativa (ahorro vs pago por viaje).
-
-# Conclusión
-
-Este proyecto permite aplicar el proceso completo de análisis de datos: desde la formulación de preguntas hasta la entrega de recomendaciones. Los datos respaldan decisiones estratégicas enfocadas en conversión de usuarios y fortalecimiento del negocio.
+## 📁 Files
+- `proyecto_cyclistic.Rmd`: RMarkdown source code.
+- `proyecto_cyclistic.html`: Rendered HTML report.
+- `data_journal_proceso_ciclístico.pdf`: Data cleaning process documentation.
 
 ---
 
-**Versión corta para portafolio:**
-> Análisis del uso de bicicletas en Chicago, comparando usuarios casuales vs miembros. Se identificaron patrones clave de comportamiento y se formularon recomendaciones de marketing basadas en datos usando R.
+# Caso de Estudio Cyclistic – Proyecto Final Google Data Analytics
+**[ 🇺🇸 English Version above ]**
+
+Este es mi proyecto final para el [Certificado Profesional de Google en Análisis de Datos](https://www.coursera.org/professional-certificates/google-data-analytics).
+
+## 🚀 Informe Interactivo
+👉 **[Haz clic aquí para ver el Análisis Completo y Gráficos](https://07jorgepalacio.github.io/cyclistic-case-study/proyecto_cyclistic.html)**
+
+## 🧩 Objetivo del Proyecto
+Analizar **12 meses de datos históricos** de Cyclistic, una empresa de bicicletas compartidas en Chicago, para entender las diferencias en el uso del servicio entre ciclistas casuales y miembros anuales, y generar recomendaciones de marketing basadas en datos.
+
+## 📊 Herramientas Utilizadas
+- **R** (Limpieza, Análisis y Visualización)
+- **Tidyverse** (dplyr, ggplot2, readr)
+- **Lubridate** (Manejo de fechas)
+- **RMarkdown** (Documentación y Reporte)
+
+## 🔍 Hallazgos Clave
+Basado en el análisis de **5.6 millones de viajes** (Dic 2022 - Nov 2023):
+- **Usuarios casuales:** Usan el servicio principalmente los fines de semana y sus viajes duran el **doble** que los de los miembros.
+- **Miembros anuales:** Mantienen un uso constante de lunes a viernes, sugiriendo un uso utilitario (transporte al trabajo).
+- **Estacionalidad:** Ambos grupos tienen su pico en verano, pero el uso casual cae drásticamente en invierno.
+
+## 📁 Archivos
+- `proyecto_cyclistic.Rmd`: Código fuente en RMarkdown.
+- `proyecto_cyclistic.html`: Informe HTML generado.
+- `data_journal_proceso_ciclístico.pdf`: Documentación del proceso.
+
+---
+**Author / Autor:** Jorge Palacio
