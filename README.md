@@ -34,7 +34,7 @@ Based on the analysis of **5.6 million trips** (Dec 2022 - Nov 2023):
 Este es mi proyecto final para el [Certificado Profesional de Google en Análisis de Datos](https://www.coursera.org/professional-certificates/google-data-analytics).
 
 ## 🚀 Informe Interactivo
-👉 **[Haz clic aquí para ver el Análisis Completo y Gráficos](https://07jorgepalacio.github.io/cyclistic-case-study/proyecto_cyclistic.html)**
+👉 **[Haz clic aquí para ver el Análisis Completo y Gráficos](https://07jorgepalacio.github.io/cyclistic-case-study/proceso_cyclistic.html)**
 
 ## 🧩 Objetivo del Proyecto
 Analizar **12 meses de datos históricos** de Cyclistic, una empresa de bicicletas compartidas en Chicago, para entender las diferencias en el uso del servicio entre ciclistas casuales y miembros anuales, y generar recomendaciones de marketing basadas en datos.
